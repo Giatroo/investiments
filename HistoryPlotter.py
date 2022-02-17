@@ -131,4 +131,47 @@ class MatplotHistoryPlotter(HistoryPlotter):
         ax.tick_params(bottom=False, left=False)
         ax.grid(which='major', axis='y', linewidth=0.1)
 
-        fig.show()
+class OneDarkPlotDecorator(HistoryPlotter):
+    _decorated_obj: HistoryPlotter
+
+    def __init__(
+        self,
+        decorated_obj: HistoryPlotter
+    ) -> None:
+        self._decorated_obj = decorated_obj
+
+    def _get_theme(self):
+        background_color = '#292C34'
+        white_color = '#ABB2BF'
+
+        return {'text.color': white_color,
+                'xtick.color': white_color,
+                'ytick.color': white_color,
+                'axes.facecolor': background_color,
+                'figure.facecolor': background_color,
+                'lines.color': white_color,
+                'axes.prop_cycle': cycler('color', ['#61afef',
+                                                    '#98c379',
+                                                    '#e06c75',
+                                                    '#56b6c2',
+                                                    '#c678dd',
+                                                    '#e5c07b',
+                                                    '#282c34',
+                                                   ])
+               }
+
+    def lineplot(self, *args, **kwargs) -> None:
+        with mpl.rc_context(rc=self._get_theme()):
+            self._decorated_obj.lineplot(*args, **kwargs)
+
+    def multi_lineplot(self, *args, **kwargs) -> None:
+        with mpl.rc_context(rc=self._get_theme()):
+            self._decorated_obj.multi_lineplot(*args, **kwargs)
+
+    def candlestick(self, *args, **kwargs) -> None:
+        with mpl.rc_context(rc=self._get_theme()):
+            self._decorated_obj.candlestick(*args, **kwargs)
+
+    def dividends(self, *args, **kwargs) -> None:
+        with mpl.rc_context(rc=self._get_theme()):
+            self._decorated_obj.dividends(*args, **kwargs)
