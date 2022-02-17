@@ -25,6 +25,11 @@ class HistoryInformationRetriever:
     ) -> Series:
         return self._history_df.set_index('Date')['Close']
 
+    def get_normalized_values_over_time(
+        self
+    ) -> Series:
+        return self._history_df.set_index('Date')['Close'] / self._history_df['Close'].iloc[0]
+
     def get_dividends_over_time(
         self,
     ) -> float:
