@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from itertools import cycle
-from typing import List
+from mimetypes import init
+from typing import List, Dict
 
 from pandas import DataFrame
 import matplotlib as mpl
@@ -11,6 +12,13 @@ from HistoryInformationRetriever import HistoryInformationRetriever
 
 
 class HistoryPlotter(ABC):
+    _colors : Dict[str, str]
+
+    def __init__(
+        self
+    ) -> None:
+        self._colors = dict()
+
     @abstractmethod
     def lineplot(
         self,
@@ -47,8 +55,21 @@ class MatplotHistoryPlotter(HistoryPlotter):
     def __init__(
         self
     ) -> None:
+        super().__init__()
         plt.rcdefaults()
-        plt.rcParams['axes.prop_cycle'] = cycler(color='bgrcmyk')
+        self._set_colors()
+
+    def _set_colors(
+        self
+    ) -> None:
+        self._colors['red'] = 'r'
+        self._colors['green'] = 'g'
+        self._colors['blue'] = 'b'
+        self._colors['cyan'] = 'c'
+        self._colors['magenta'] = 'm'
+        self._colors['yellow'] = 'y'
+        self._colors['black'] = 'k'
+        self._colors['white'] = 'w'
 
     def lineplot(
         self,
@@ -63,7 +84,7 @@ class MatplotHistoryPlotter(HistoryPlotter):
         time_interval = info_retriever.get_interval()
         ticker_code = info_retriever._ticker_code
 
-        color = 'C1' if variation > 0 else 'C2'
+        color = self._colors['green'] if variation > 0 else self._colors['red']
 
         if ax is None:
             _, ax = plt.subplots(1, 1, figsize=(15, 3))
@@ -97,7 +118,7 @@ class MatplotHistoryPlotter(HistoryPlotter):
         if linewidths is None:
             linewidths = [1]
         if colors is None:
-            colors = list('rgbcmyk')
+            colors = self._colors.values()
         if labels is None:
             labels = history_df.columns.copy()
 
@@ -137,10 +158,10 @@ class MatplotHistoryPlotter(HistoryPlotter):
 
         if ax is None:
             _, ax = plt.subplots(1, 1, figsize=(15, 3))
-        ax.bar(series.index, series, width=5, color='C1')
+        ax.bar(series.index, series, width=5, color=self._colors['green'])
 
         ax.set_title(f'{ticker_code} dividends',
-                     color='C1',
+                     color=self._colors['green'],
                      fontsize='x-large',
                      fontweight='bold')
 
@@ -161,20 +182,21 @@ class OneDarkPlotDecorator(HistoryPlotter):
         background_color = '#292C34'
         white_color = '#ABB2BF'
 
+        self._decorated_obj._colors['red'] = '#E06C75'
+        self._decorated_obj._colors['green'] = '#98C379'
+        self._decorated_obj._colors['blue'] = '#61AFEF'
+        self._decorated_obj._colors['cyan'] = '#56B6C2'
+        self._decorated_obj._colors['magenta'] = '#C678DD'
+        self._decorated_obj._colors['yellow'] = '#E5C07B'
+        self._decorated_obj._colors['black'] = background_color
+        self._decorated_obj._colors['white'] = white_color
+
         return {'text.color': white_color,
                 'xtick.color': white_color,
                 'ytick.color': white_color,
                 'axes.facecolor': background_color,
                 'figure.facecolor': background_color,
                 'lines.color': white_color,
-                'axes.prop_cycle': cycler('color', ['#61afef',
-                                                    '#98c379',
-                                                    '#e06c75',
-                                                    '#56b6c2',
-                                                    '#c678dd',
-                                                    '#e5c07b',
-                                                    '#282c34',
-                                                   ])
                }
 
     def lineplot(self, *args, **kwargs) -> None:
