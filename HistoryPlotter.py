@@ -82,7 +82,7 @@ class MatplotHistoryPlotter(HistoryPlotter):
         variation = info_retriever.get_variation()
         series = info_retriever.get_values_over_time()
         time_interval = info_retriever.get_interval()
-        ticker_code = info_retriever._ticker_code
+        ticker_code = info_retriever.get_ticker_code()
 
         color = self._colors['green'] if variation > 0 else self._colors['red']
 
@@ -160,7 +160,7 @@ class MatplotHistoryPlotter(HistoryPlotter):
             _, ax = plt.subplots(1, 1, figsize=(15, 3))
         ax.bar(series.index, series, width=5, color=self._colors['green'])
 
-        ax.set_title(f'{ticker_code} dividends',
+        ax.set_title(f'{info_retriever.get_ticker_code()} dividends',
                      color=self._colors['green'],
                      fontsize='x-large',
                      fontweight='bold')

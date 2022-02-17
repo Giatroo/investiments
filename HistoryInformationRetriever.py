@@ -1,7 +1,7 @@
-from cv2 import getTickCount
 from pandas import Series, Timestamp
 from typing import Tuple
 from pandas import DataFrame
+
 import numpy as np
 
 from util import get_ticker
@@ -19,6 +19,11 @@ class HistoryInformationRetriever:
         ticker = get_ticker(ticker_code) 
         self._ticker_code = ticker_code.upper()
         self._history_df = ticker.history(**history_kwargs).reset_index()
+
+    def get_ticker_code(
+        self
+    ) -> str:
+        return self._ticker_code
 
     def get_values_over_time(
         self
