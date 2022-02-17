@@ -115,14 +115,18 @@ class MatplotHistoryPlotter(HistoryPlotter):
         if ax is None:
             _, ax = plt.subplots(1, 1, figsize=(15, 3))
 
+        num_cols = len(history_df.columns)
+
         if linewidths is None:
-            linewidths = [1]
+            linewidths = [1] * num_cols
+        if len(linewidths) == 1:
+            linewidths = linewidths * num_cols
         if colors is None:
-            colors = self._colors.values()
+            colors = list(self._colors.values())[:num_cols]
         if labels is None:
             labels = history_df.columns.copy()
 
-        cycler_obj = (cycler(color=colors) *
+        cycler_obj = (cycler(color=colors) +
                       cycler(linewidth=linewidths))
 
         ax.set_prop_cycle(cycler_obj)
