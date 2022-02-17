@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+from itertools import cycle
+from typing import List
 
 from pandas import DataFrame
 import matplotlib as mpl
@@ -83,23 +85,38 @@ class MatplotHistoryPlotter(HistoryPlotter):
     def multi_lineplot(
         self,
         history_df : DataFrame,
+        linewidths : List[int] = None,
+        colors : List[str] = None,
+        labels : List[str] = None,
+        title : str = '',
         ax = None
     ) -> None:
         if ax is None:
             _, ax = plt.subplots(1, 1, figsize=(15, 3))
 
-        for ticker_code in history_df.columns:
-            plt.plot(history_df.index, history_df[ticker_code], linewidth=1, label=ticker_code)
+        if linewidths is None:
+            linewidths = [1]
+        if colors is None:
+            colors = list('rgbcmyk')
+        if labels is None:
+            labels = history_df.columns.copy()
+
+        cycler_obj = (cycler(color=colors) *
+                      cycler(linewidth=linewidths))
+
+        ax.set_prop_cycle(cycler_obj)
+        for ticker_code, label in zip(history_df.columns, labels):
+            ax.plot(history_df.index, history_df[ticker_code], label=label)
 
         time_interval = history_df.index.min(), history_df.index.max()
         ax.set_xlim(time_interval)
         ax.set_ylabel('')
         ax.set_xlabel('')
+        ax.set_title(title)
 
         ax.spines[:].set_visible(False)
         ax.tick_params(bottom=False, left=False)
         ax.grid(which='major', axis='y', linewidth=0.1)
-
         ax.legend()
 
     def candlestick(
