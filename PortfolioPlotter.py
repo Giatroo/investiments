@@ -2,6 +2,7 @@ from statistics import variance
 from cv2 import norm
 from matplotlib.pyplot import hist
 import pandas as pd
+from HistoryInformationRetriever import HistoryInformationRetriever
 
 from Portfolio import Portfolio
 from HistoryPlotter import HistoryPlotter
@@ -25,7 +26,6 @@ class PortfolioPlotter():
         history_df = self._portfolio.get_history_df(**history_kwargs)
         self._plotter.multi_lineplot(history_df)
         
-
     def plot_normalized_individual_tickers(
         self,
         **history_kwargs
@@ -37,18 +37,12 @@ class PortfolioPlotter():
         self,
         **history_kwargs
     ) -> None:
-        portfolio_values = self._portfolio.get_portfolio_values(**history_kwargs)
+        history_df = self._portfolio.get_portfolio_as_history(**history_kwargs).reset_index()
+        history_df.rename(columns={history_df.columns[0]: 'Date'}, inplace=True)
+
+        info_retriever = HistoryInformationRetriever('portfolio', history_df=history_df, **history_kwargs)
         
-        first_vale = portfolio_values.iloc[0]
-        last_value = portfolio_values.iloc[-1]
-        variation = (last_value - first_vale) / first_vale
-
-        color = 'g' if variation > 0 else 'r'
-        title = f'Portfolio ({variation * 100:.2f}%)'
-
-        self._plotter.multi_lineplot(pd.DataFrame(portfolio_values),
-                                     colors=[color],
-                                     title=title)
+        self._plotter.lineplot('portfolio', info_retriever=info_retriever, **history_kwargs)
 
     def plot_portfolio(
         self,
