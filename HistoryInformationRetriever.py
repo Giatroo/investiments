@@ -14,11 +14,16 @@ class HistoryInformationRetriever:
     def __init__(
         self,
         ticker_code: str,
+        history_df: DataFrame = None,
         **history_kwargs
     ) -> None:
-        ticker = get_ticker(ticker_code) 
         self._ticker_code = ticker_code.upper()
-        self._history_df = ticker.history(**history_kwargs).reset_index()
+        if history_df is None:
+            ticker = get_ticker(ticker_code) 
+            self._history_df = ticker.history(**history_kwargs).reset_index()
+            self._history_df.rename(columns={self._history_df.columns[0]: 'Date'}, inplace=True)
+        else:
+            self._history_df = history_df
 
     def get_ticker_code(
         self
@@ -29,6 +34,11 @@ class HistoryInformationRetriever:
         self
     ) -> Series:
         return self._history_df.set_index('Date')['Close']
+    
+    def get_history_df(
+        self
+    ) -> DataFrame:
+        return self._history_df
 
     def get_normalized_values_over_time(
         self
