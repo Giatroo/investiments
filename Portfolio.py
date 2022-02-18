@@ -1,6 +1,6 @@
 from typing import List
 from matplotlib.pyplot import hist
-from pandas import DataFrame
+from pandas import DataFrame, Series
 from numpy import dtype, ndarray
 
 import pandas as pd
@@ -75,6 +75,14 @@ class Portfolio:
         history_df = self.get_history_df(**history_kwargs)
         history_df /= history_df.iloc[0]
         return history_df
+
+    def get_portfolio_values(
+        self, 
+        **history_kwargs
+    ) -> Series:
+        history_df = self.get_normalized_history_df(**history_kwargs)
+        history_df *= self._values
+        return history_df.sum(axis='columns')
 
     def get_portfolio_df(
         self, 
