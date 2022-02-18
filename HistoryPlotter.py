@@ -23,6 +23,7 @@ class HistoryPlotter(ABC):
     def lineplot(
         self,
         ticker_code: str,
+        info_retriever: HistoryInformationRetriever = None,
         **history_kwargs
     ) -> None:
         pass
@@ -38,6 +39,7 @@ class HistoryPlotter(ABC):
     def candlestick(
         self,
         ticker_code: str,
+        info_retriever: HistoryInformationRetriever = None,
         **history_kwargs
     ) -> None:
         pass
@@ -46,6 +48,7 @@ class HistoryPlotter(ABC):
     def dividends(
         self,
         ticker_code: str,
+        info_retriever: HistoryInformationRetriever = None,
         **history_kwargs
     ) -> None:
         pass
@@ -74,10 +77,12 @@ class MatplotHistoryPlotter(HistoryPlotter):
     def lineplot(
         self,
         ticker_code: str,
+        info_retriever: HistoryInformationRetriever = None,
         ax = None,
         **history_kwargs
     ) -> None:
-        info_retriever = HistoryInformationRetriever(ticker_code, **history_kwargs)
+        if info_retriever is None:
+            info_retriever = HistoryInformationRetriever(ticker_code, **history_kwargs)
 
         variation = info_retriever.get_variation()
         series = info_retriever.get_values_over_time()
@@ -152,17 +157,20 @@ class MatplotHistoryPlotter(HistoryPlotter):
     def candlestick(
         self,
         ticker_code: str,
+        info_retriever: HistoryInformationRetriever = None,
         **history_kwargs
     ) -> None:
-        return super().candlestick()
+        return super().candlestick(ticker_code, info_retriever, **history_kwargs)
 
     def dividends(
         self,
         ticker_code: str,
+        info_retriever: HistoryInformationRetriever = None,
         ax = None,
         **history_kwargs
     ) -> None:
-        info_retriever = HistoryInformationRetriever(ticker_code, **history_kwargs)
+        if info_retriever is None:
+            info_retriever = HistoryInformationRetriever(ticker_code, **history_kwargs)
         series = info_retriever.get_dividends_over_time()
 
         if ax is None:
