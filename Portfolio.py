@@ -93,6 +93,19 @@ class Portfolio:
         history_df['portfolio'] = history_df.sum(axis='columns')
         return history_df
 
+    def get_portfolio_as_history(
+        self,
+        **history_kwargs
+    ) -> DataFrame:
+        dfs = list()
+        for ticker, value in zip(self._ticker_codes, self._values):
+            history_df = HistoryInformationRetriever(ticker, **history_kwargs).get_history_df()
+            history_df[['Open', 'High', 'Low', 'Close']] /= history_df[['Open', 'High', 'Low', 'Close']].iloc[0]
+            history_df[['Open', 'High', 'Low', 'Close']] *= value
+            dfs.append(history_df)
+        history_df = pd.concat(dfs).groupby('Date').sum()
+        return history_df
+
     def get_normalized_portfolio_df(
         self, 
         **history_kwargs
