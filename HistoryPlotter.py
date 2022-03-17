@@ -152,7 +152,7 @@ class MatplotHistoryPlotter(HistoryPlotter):
         ax.spines[:].set_visible(False)
         ax.tick_params(bottom=False, left=False)
         ax.grid(which='major', axis='y', linewidth=0.1)
-        ax.legend()
+        ax.legend(loc='upper left')
 
     def candlestick(
         self,
