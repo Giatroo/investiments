@@ -114,16 +114,21 @@ class MatplotHistoryPlotter(HistoryPlotter):
         linestyles : List[str] = None,
         colors : List[str] = None,
     ) -> cycler:
-        num_colors = len(list(self._colors.values()))
         if colors is None:
-            colors = list(self._colors.values())
+            colors = list(self._colors.values())[:-2]  # remove background colors
+        num_colors = len(colors)
         if linewidths is None:
             linewidths = [1] * num_colors
+        num_widths = len(linewidths)
         if linestyles is None:
             linestyles = ['-'] * num_colors
+        num_styles = len(linestyles)
 
-        linewidths = (linewidths * num_colors)[:num_colors]
-        linestyles = (linestyles * num_colors)[:num_colors]
+        max_cicle = max(num_colors, num_widths, num_styles)
+
+        colors = (colors * max_cicle)[:max_cicle]
+        linewidths = (linewidths * max_cicle)[:max_cicle]
+        linestyles = (linestyles * max_cicle)[:max_cicle]
 
         color_cycler = cycler(color=colors)
         linewidth_cycler = cycler(linewidth=linewidths)
