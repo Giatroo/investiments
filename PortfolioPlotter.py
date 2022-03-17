@@ -1,11 +1,9 @@
-from statistics import variance
-from cv2 import norm
-from matplotlib.pyplot import hist
-import pandas as pd
 from HistoryInformationRetriever import HistoryInformationRetriever
 
 from Portfolio import Portfolio
 from HistoryPlotter import HistoryPlotter
+
+from typing import List
 
 class PortfolioPlotter():
     _portfolio: Portfolio
@@ -21,17 +19,37 @@ class PortfolioPlotter():
         
     def plot_individual_tickers(
         self,
+        linewidths : List[int] = None,
+        linestyles : List[str] = None,
+        colors : List[str] = None,
+        labels : List[str] = None,
+        title : str = '',
         **history_kwargs
     ) -> None:
         history_df = self._portfolio.get_history_df(**history_kwargs)
-        self._plotter.multi_lineplot(history_df)
+        self._plotter.multi_lineplot(history_df, 
+                                     linewidths=linewidths, 
+                                     linestyles=linestyles,
+                                     colors=colors,
+                                     labels=labels,
+                                     title=title)
         
     def plot_normalized_individual_tickers(
         self,
+        linewidths : List[int] = None,
+        linestyles : List[str] = None,
+        colors : List[str] = None,
+        labels : List[str] = None,
+        title : str = '',
         **history_kwargs
     ) -> None:
         normalized_history_df = self._portfolio.get_normalized_history_df(**history_kwargs)
-        self._plotter.multi_lineplot(normalized_history_df)
+        self._plotter.multi_lineplot(normalized_history_df,
+                                     linewidths=linewidths, 
+                                     linestyles=linestyles,
+                                     colors=colors,
+                                     labels=labels,
+                                     title=title)
 
     def plot_portfolio_as_stock(
         self,
