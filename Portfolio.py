@@ -27,6 +27,8 @@ class Portfolio:
     ) -> None:
         self._ticker_codes = ticker_codes
         self._ticker_list = [get_ticker(ticker_code) for ticker_code in ticker_codes]
+        if values is None:
+            values = [1.0] * len(ticker_codes)
         self._values = np.array(values, dtype=np.float64)
         self._set_percentages(values)
 
