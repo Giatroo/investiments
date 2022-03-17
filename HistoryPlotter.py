@@ -108,6 +108,31 @@ class MatplotHistoryPlotter(HistoryPlotter):
         ax.tick_params(bottom=False, left=False)
         ax.grid(which='major', axis='y', linewidth=0.1)
 
+    def _create_multi_lineplot_cycler(
+        self,
+        linewidths : List[int] = None,
+        linestyles : List[str] = None,
+        colors : List[str] = None,
+    ) -> cycler:
+        num_colors = len(list(self._colors.values()))
+        if colors is None:
+            colors = list(self._colors.values())
+        if linewidths is None:
+            linewidths = [1] * num_colors
+        if linestyles is None:
+            linestyles = ['-'] * num_colors
+
+        linewidths = (linewidths * num_colors)[:num_colors]
+        linestyles = (linestyles * num_colors)[:num_colors]
+
+        color_cycler = cycler(color=colors)
+        linewidth_cycler = cycler(linewidth=linewidths)
+        linestyle_cycler = cycler(linestyle=linestyles)
+
+        cycler_obj = (color_cycler + linewidth_cycler + linestyle_cycler)
+        return cycler_obj
+
+
     def multi_lineplot(
         self,
         history_df : DataFrame,
@@ -121,25 +146,14 @@ class MatplotHistoryPlotter(HistoryPlotter):
         if ax is None:
             _, ax = plt.subplots(1, 1, figsize=(15, 3))
 
-        num_cols = len(history_df.columns)
-        if linewidths is None:
-            linewidths = [1] * num_cols
-        if len(linewidths) == 1:
-            linewidths = linewidths * num_cols
-        if linestyles is None:
-            linestyles = ['-'] * num_cols
-        if len(linestyles) == 1:
-            linestyles = linestyles * num_cols
-        if colors is None:
-            colors = list(self._colors.values())[:num_cols]
         if labels is None:
             labels = history_df.columns.copy()
 
-        cycler_obj = (cycler(color=colors) +
-                      cycler(linewidth=linewidths) +
-                      cycler(linestyle=linestyles))
-
+        cycler_obj = self._create_multi_lineplot_cycler(linewidths=linewidths,
+                                                        linestyles=linestyles,
+                                                        colors=colors)
         ax.set_prop_cycle(cycler_obj)
+
         for ticker_code, label in zip(history_df.columns, labels):
             ax.plot(history_df.index, history_df[ticker_code], label=label)
 
