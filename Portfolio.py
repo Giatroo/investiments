@@ -49,10 +49,12 @@ class Portfolio:
     def _check_percentage_consistency(
         self,
     ) -> None:
-        percentage_sum = self._percentages.sum()
+        percentage_sum = self._percentages.sum().round(3)
+        num_percentages = len(self._percentages)
+        num_tickers = len(self._ticker_codes)
 
-        assert percentage_sum == 1, "The sum of percentages must be 100 or 1."
-        assert len(self._percentages) == len(self._ticker_codes), "The number of tickers must be equal to the number of percentages"
+        assert percentage_sum == 1, f"The sum of percentages must be 100 or 1. It's {percentage_sum}."
+        assert num_percentages == num_tickers, f"The number of tickers ({num_tickers}) must be equal to the number of percentages ({num_percentages})."
 
     def get_percentages(
         self
