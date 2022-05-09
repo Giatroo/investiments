@@ -5,7 +5,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from cycler import Cycler, cycler
 from matplotlib.axes import Axes
-from pandas import DataFrame, Timestamp
+from pandas import Timestamp
 
 from Stock import StockInterface
 
