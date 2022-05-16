@@ -5,9 +5,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from cycler import Cycler, cycler
 from matplotlib.axes import Axes
-from pandas import Timestamp
-
-from Stock import StockInterface
+from pandas import Series, Timestamp
 
 
 class StockPlotter(ABC):
@@ -17,29 +15,54 @@ class StockPlotter(ABC):
         self._colors = dict()
 
     @abstractmethod
-    def lineplot(self, stock: StockInterface, **history_kwargs) -> None:
+    def lineplot(self, stock_name: str, stock_series: Series) -> None:
+        """Plots a line of the stocks prices. If the final price is higher than
+        the initial price, the line is plotted in green. If the final price is
+        lower than the initial price, the line is plotted in red.
+
+        The title is contains the name of the stock and the overall performance.
+
+        Parameters
+        ----------
+        stock_name : str
+            The stock name.
+        stock_series : Series
+            The series of prices.
+        """
         pass
 
     @abstractmethod
     def multi_lineplot(
-        self, stocks: List[StockInterface], **history_kwargs
+        self,
+        stock_names: List[str],
+        stocks_series: List[Series],
     ) -> None:
+        """Plots multiple lines for each stock.
+
+        Parameters
+        ----------
+        stock_names : List[str]
+            The names of the stocks, it can be used to label the lines.
+        stocks_series : List[Series]
+            The series of prices.
+        """
         pass
 
     @abstractmethod
-    def candlestick(
-        self,
-        stock: StockInterface,
-        **history_kwargs,
-    ) -> None:
+    def candlestick(self, stock_name: str, stock_series: Series) -> None:
         pass
 
     @abstractmethod
-    def dividends(
-        self,
-        stock: StockInterface,
-        **history_kwargs,
-    ) -> None:
+    def dividends(self, stock_name: str, stock_series: Series) -> None:
+        """Plots the dividends of the stock.
+
+        Parameters
+        ----------
+        stock_name : str
+            The stock name.
+        stock_series : Series
+            The series of dividends.
+        """
         pass
 
 
@@ -61,29 +84,41 @@ class MatplotStockPlotter(StockPlotter):
 
     def lineplot(
         self,
-        stock: StockInterface,
+        stock_name: str,
+        stock_series: Series,
         ax: Union[Axes, None] = None,
-        **history_kwargs,
     ) -> None:
+        """Plots a line of the stocks prices. If the final price is higher than
+        the initial price, the line is plotted in green. If the final price is
+        lower than the initial price, the line is plotted in red.
 
-        variation = stock.get_period_valorization(**history_kwargs)
-        variation = variation - 1
-        series = stock.get_close_series(**history_kwargs)
-        start_time = series.index[0]
-        end_time = series.index[-1]
+        The title is contains the name of the stock and the overall performance.
+
+        Parameters
+        ----------
+        stock_name : str
+            The stock name.
+        stock_series : Series
+            The series of prices.
+        """
+
+        start_time = stock_series.index[0]
+        end_time = stock_series.index[-1]
+        normalized_series = stock_series / stock_series.iloc[0]
+        variation = normalized_series[-1] - 1
 
         color = self._colors["green"] if variation > 0 else self._colors["red"]
 
         if ax is None:
             _, ax = plt.subplots(1, 1, figsize=(15, 3))
-        plt.plot(series.index, series, linewidth=3, c=color)
+        plt.plot(stock_series.index, stock_series, linewidth=3, c=color)
 
         ax.set_xlim([start_time, end_time])
         ax.set_ylabel("")
         ax.set_xlabel("")
 
         ax.set_title(
-            f"{stock.name} ({variation * 100:.2f}%)",
+            f"{stock_name} ({variation * 100:.2f}%)",
             color=color,
             fontsize="x-large",
             fontweight="bold",
@@ -125,32 +160,36 @@ class MatplotStockPlotter(StockPlotter):
 
     def multi_lineplot(
         self,
-        stocks: List[StockInterface],
+        stocks_names: List[str],
+        stocks_series: List[Series],
         linewidths: Union[List[int], None] = None,
         linestyles: Union[List[str], None] = None,
         colors: Union[List[str], None] = None,
-        labels: Union[List[str], None] = None,
         title: str = "",
         ax: Union[Axes, None] = None,
-        **history_kwargs,
     ) -> None:
+        """Plots multiple lines for each stock.
+
+        Parameters
+        ----------
+        stock_names : List[str]
+            The names of the stocks, it can be used to label the lines.
+        stocks_series : List[Series]
+            The series of prices.
+        """
         if ax is None:
             _, ax = plt.subplots(1, 1, figsize=(15, 3))
-
-        if labels is None:
-            labels = [stock.name for stock in stocks]
 
         cycler_obj = self._create_multi_lineplot_cycler(
             linewidths=linewidths, linestyles=linestyles, colors=colors
         )
         ax.set_prop_cycle(cycler_obj)
 
-        tmp_series = stocks[0].get_close_series(**history_kwargs)
+        tmp_series = stocks_series[0]
         start_time = Timestamp(tmp_series.index[0])
         end_time = Timestamp(tmp_series.index[-1])
-        for stock, label in zip(stocks, labels):
-            series = stock.get_close_series(**history_kwargs)
-            ax.plot(series.index, series, label=label)
+        for series, name in zip(stocks_series, stocks_names):
+            ax.plot(series.index, series, label=name)
 
             series_start_time = Timestamp(series.index[0])
             series_end_time = Timestamp(series.index[-1])
@@ -169,24 +208,31 @@ class MatplotStockPlotter(StockPlotter):
         ax.grid(which="major", axis="y", linewidth=0.1)
         ax.legend(loc="upper left")
 
-    def candlestick(self, stock: StockInterface, **history_kwargs) -> None:
-        return super().candlestick(stock, **history_kwargs)
+    def candlestick(self, stock_name: str, stock_series: Series) -> None:
+        return super().candlestick(stock_name, stock_series)
 
     def dividends(
         self,
-        stock: StockInterface,
+        stock_name: str,
+        dividends: Series,
         ax: Union[Axes, None] = None,
-        **history_kwargs,
     ) -> None:
-        dividends = stock.get_monthly_dividends_series(**history_kwargs)
+        """Plots the dividends of the stock.
 
+        Parameters
+        ----------
+        stock_name : str
+            The stock name.
+        stock_series : Series
+            The series of dividends.
+        """
         if ax is None:
             _, ax = plt.subplots(1, 1, figsize=(15, 3))
 
         ax.bar(dividends.index, dividends, width=5, color=self._colors["green"])
 
         ax.set_title(
-            f"{stock.name} dividends",
+            f"{stock_name} dividends",
             color=self._colors["green"],
             fontsize="x-large",
             fontweight="bold",
