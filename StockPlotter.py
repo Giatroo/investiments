@@ -71,7 +71,6 @@ class MatplotStockPlotter(StockPlotter):
         series = stock.get_close_series(**history_kwargs)
         start_time = series.index[0]
         end_time = series.index[-1]
-        ticker_code = stock.get_stock_name()
 
         color = self._colors["green"] if variation > 0 else self._colors["red"]
 
@@ -84,7 +83,7 @@ class MatplotStockPlotter(StockPlotter):
         ax.set_xlabel("")
 
         ax.set_title(
-            f"{ticker_code} ({variation * 100:.2f}%)",
+            f"{stock.name} ({variation * 100:.2f}%)",
             color=color,
             fontsize="x-large",
             fontweight="bold",
@@ -139,7 +138,7 @@ class MatplotStockPlotter(StockPlotter):
             _, ax = plt.subplots(1, 1, figsize=(15, 3))
 
         if labels is None:
-            labels = [stock.get_stock_name() for stock in stocks]
+            labels = [stock.name for stock in stocks]
 
         cycler_obj = self._create_multi_lineplot_cycler(
             linewidths=linewidths, linestyles=linestyles, colors=colors
@@ -180,7 +179,6 @@ class MatplotStockPlotter(StockPlotter):
         **history_kwargs,
     ) -> None:
         dividends = stock.get_monthly_dividends_series(**history_kwargs)
-        name = stock.get_stock_name()
 
         if ax is None:
             _, ax = plt.subplots(1, 1, figsize=(15, 3))
@@ -188,7 +186,7 @@ class MatplotStockPlotter(StockPlotter):
         ax.bar(dividends.index, dividends, width=5, color=self._colors["green"])
 
         ax.set_title(
-            f"{name} dividends",
+            f"{stock.name} dividends",
             color=self._colors["green"],
             fontsize="x-large",
             fontweight="bold",

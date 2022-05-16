@@ -7,8 +7,9 @@ import util
 
 
 class StockInterface(ABC):
+    @property
     @abstractmethod
-    def get_stock_name(self) -> str:
+    def name(self) -> str:
         """Returns the name of the stock.
 
         Returns
@@ -16,6 +17,18 @@ class StockInterface(ABC):
         name : str
             The name of the stock. Each subclass can define how it returns the
             name.
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def value(self) -> float:
+        """Returns the value of the stock.
+
+        Returns
+        -------
+        value : float
+            The value of the stock.
         """
         pass
 
@@ -174,8 +187,13 @@ class Stock(StockInterface):
         self._value = value
         self._ticker = util.get_ticker(self._ticker_code)
 
-    def get_stock_name(self) -> str:
+    @property
+    def name(self) -> str:
         return self._ticker_code
+
+    @property
+    def value(self) -> float:
+        return self._value
 
     def get_history_df(self, **history_kwargs) -> DataFrame:
         return self._ticker.history(**history_kwargs)
